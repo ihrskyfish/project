@@ -179,7 +179,7 @@ const drawChart = () => {
 
     // Add axes
     const xAxis = d3.axisBottom(x)
-        .ticks(10)  // Reduced number of ticks
+        .ticks(d3.timeDay.every(1)) // Show every day
         .tickFormat(d3.timeFormat('%b %d'))
         .tickSize(-height)  // Add grid lines
 
@@ -197,6 +197,7 @@ const drawChart = () => {
         .attr('dx', '-.8em')
         .attr('dy', '.15em')
         .attr('transform', 'rotate(-45)')
+        .style('font-size', '12px') // Slightly smaller font to fit all dates
 
     svg.append('g')
         .attr('class', 'y-axis')

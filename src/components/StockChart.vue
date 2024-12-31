@@ -38,10 +38,10 @@ const drawChart = () => {
     // Clear previous chart
     d3.select(chartRef.value).selectAll('*').remove()
 
-    // Increase margins and height
-    const margin = { top: 40, right: 80, bottom: 100, left: 80 }  // Increased margins
+    // Significantly increase margins and dimensions
+    const margin = { top: 50, right: 100, bottom: 120, left: 100 }
     const width = chartRef.value.clientWidth - margin.left - margin.right
-    const height = 700 - margin.top - margin.bottom  // Increased from 500
+    const height = 900 - margin.top - margin.bottom  // Increased height
 
     // Create SVG with gradient background
     const svg = d3.select(chartRef.value)
@@ -118,9 +118,9 @@ const drawChart = () => {
         .enter()
         .append('rect')
         .attr('class', 'volume-bar')
-        .attr('x', d => x(d.date) - 1)
+        .attr('x', d => x(d.date) - 3)  // Increased width
         .attr('y', d => yVolume(d.volume))
-        .attr('width', 2)
+        .attr('width', 6)  // Increased width
         .attr('height', d => height - yVolume(d.volume))
         .attr('fill', 'rgba(100, 100, 100, 0.3)')
 
@@ -137,7 +137,7 @@ const drawChart = () => {
         .attr('class', 'price-line')
         .attr('fill', 'none')
         .attr('stroke', '#48CAE4')
-        .attr('stroke-width', 2.5)
+        .attr('stroke-width', 3)
         .attr('d', priceLine)
 
     svg.append('path')
@@ -145,7 +145,7 @@ const drawChart = () => {
         .attr('class', 'ma20-line')
         .attr('fill', 'none')
         .attr('stroke', '#FFB703')
-        .attr('stroke-width', 2)
+        .attr('stroke-width', 2.5)
         .attr('stroke-dasharray', '5,5')
         .attr('d', ma20Line)
 
@@ -154,7 +154,7 @@ const drawChart = () => {
         .attr('class', 'boll-upper')
         .attr('fill', 'none')
         .attr('stroke', '#FB8500')
-        .attr('stroke-width', 1.5)
+        .attr('stroke-width', 2)
         .attr('stroke-dasharray', '3,3')
         .attr('d', bollUpperLine)
 
@@ -163,18 +163,20 @@ const drawChart = () => {
         .attr('class', 'boll-lower')
         .attr('fill', 'none')
         .attr('stroke', '#FB8500')
-        .attr('stroke-width', 1.5)
+        .attr('stroke-width', 2)
         .attr('stroke-dasharray', '3,3')
         .attr('d', bollLowerLine)
 
     // Add axes
     const xAxis = d3.axisBottom(x)
-        .ticks(5)
+        .ticks(10)  // Reduced number of ticks
         .tickFormat(d3.timeFormat('%b %d'))
+        .tickSize(-height)  // Add grid lines
 
     const yAxis = d3.axisRight(y)
-        .ticks(10)
+        .ticks(8)  // Reduced number of ticks
         .tickFormat(d => `$${d.toFixed(2)}`)
+        .tickSize(-width)  // Add grid lines
 
     svg.append('g')
         .attr('class', 'x-axis')
@@ -185,20 +187,14 @@ const drawChart = () => {
         .attr('dx', '-.8em')
         .attr('dy', '.15em')
         .attr('transform', 'rotate(-45)')
-        .style('font-size', '12px')
 
     svg.append('g')
         .attr('class', 'y-axis')
         .attr('transform', `translate(${width}, 0)`)
         .call(yAxis)
-        .selectAll('text')
-        .style('font-size', '12px')
 
     // Add interactive overlay
     const tooltip = d3.select(tooltipRef.value)
-        .style('font-size', '14px')
-        .style('padding', '12px')
-
     const bisect = d3.bisector(d => d.date).left
 
     const overlay = svg.append('rect')
@@ -259,6 +255,10 @@ const drawChart = () => {
           MA20: $${d.ma20.toFixed(2)}
         `)
         })
+
+    // Adjust tick styling
+    svg.selectAll('.tick line')
+        .attr('stroke', 'rgba(128, 128, 128, 0.1)')  // Lighter grid lines
 }
 
 // Handle window resize
@@ -294,36 +294,36 @@ onUnmounted(() => {
 
 <style scoped>
 .stock-chart {
-    padding: 30px;
+    padding: 40px;
     background: var(--color-background-soft);
-    border-radius: 8px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-    margin: 20px;
-    max-width: 1200px;
-    width: 95%;
-    margin-left: auto;
-    margin-right: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+    margin: 40px auto;
+    /* Make container much wider */
+    max-width: 1600px;  /* Increased from 1200px */
+    width: 98%;
 }
 
 h2 {
     color: var(--color-heading);
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
+    font-size: 2.5rem;  /* Increased font size */
+    margin-bottom: 2rem;
     text-align: center;
 }
 
 .chart-container {
     width: 100%;
     overflow: hidden;
-    min-height: 700px;
+    min-height: 900px;  /* Increased height */
+    margin: 20px 0;
 }
 
 .legend {
     display: flex;
     justify-content: center;
-    gap: 30px;
-    margin-bottom: 30px;
-    font-size: 16px;
+    gap: 50px;  /* Increased gap */
+    margin: 40px 0;  /* Increased margin */
+    font-size: 18px;  /* Increased font size */
 }
 
 .legend span {
@@ -334,8 +334,9 @@ h2 {
 
 .legend-color {
     display: inline-block;
-    width: 30px;
-    height: 4px;
+    width: 40px;  /* Increased width */
+    height: 5px;  /* Increased height */
+    margin-right: 10px;
 }
 
 .legend-color.price {
@@ -355,18 +356,18 @@ h2 {
     display: none;
     background: rgba(255, 255, 255, 0.95);
     border: 1px solid #ccc;
-    border-radius: 6px;
-    padding: 12px;
-    font-size: 14px;
+    border-radius: 8px;
+    padding: 20px;
+    font-size: 16px;
     pointer-events: none;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    min-width: 200px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    min-width: 250px;
 }
 
 :deep(.x-axis),
 :deep(.y-axis) {
     color: var(--color-text);
-    font-size: 12px;
+    font-size: 14px;
 }
 
 :deep(.x-axis path),
@@ -374,24 +375,46 @@ h2 {
 :deep(.x-axis line),
 :deep(.y-axis line) {
     stroke: var(--color-border);
-    stroke-width: 1.5;
+    stroke-width: 2;
 }
 
 :deep(.x-axis text),
 :deep(.y-axis text) {
     fill: var(--color-text);
+    font-weight: 500;
 }
 
-:deep(.price-line) {
-    stroke-width: 2.5;
+/* Responsive design adjustments */
+@media (max-width: 1800px) {
+    .stock-chart {
+        max-width: 1400px;
+    }
 }
 
-:deep(.ma20-line) {
-    stroke-width: 2;
+@media (max-width: 1400px) {
+    .stock-chart {
+        max-width: 1200px;
+    }
 }
 
-:deep(.boll-upper), :deep(.boll-lower) {
-    stroke-width: 1.5;
+@media (max-width: 1200px) {
+    .stock-chart {
+        max-width: 95%;
+        padding: 20px;
+    }
+
+    .chart-container {
+        min-height: 700px;
+    }
+
+    h2 {
+        font-size: 2rem;
+    }
+
+    .legend {
+        gap: 30px;
+        font-size: 16px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -400,17 +423,18 @@ h2 {
         width: 98%;
     }
 
-    h2 {
-        font-size: 1.5rem;
-    }
-
     .chart-container {
         min-height: 500px;
     }
 
+    h2 {
+        font-size: 1.5rem;
+    }
+
     .legend {
         flex-wrap: wrap;
-        gap: 15px;
+        gap: 20px;
+        font-size: 14px;
     }
 }
 </style>

@@ -327,6 +327,11 @@ onUnmounted(() => {
             <span><span class="legend-color price"></span>Price</span>
             <span><span class="legend-color ma20"></span>20-day MA</span>
             <span><span class="legend-color bollinger"></span>Bollinger Bands</span>
+            <span><span class="legend-color volume"></span>Volume</span>
+            <span class="legend-item">
+                <span class="legend-color up"></span>Price Up
+                <span class="legend-color down"></span>Price Down
+            </span>
         </div>
         <div ref="chartRef" class="chart-container"></div>
         <div ref="tooltipRef" class="tooltip"></div>
@@ -389,6 +394,24 @@ h2 {
 
 .legend-color.bollinger {
     background: #FB8500;
+}
+
+.legend-color.volume {
+    background: rgba(100, 100, 100, 0.3);
+}
+
+.legend-color.up {
+    background: #48CAE4;
+    margin-right: 5px;
+}
+
+.legend-color.down {
+    background: #FF4B4B;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
 }
 
 .tooltip {

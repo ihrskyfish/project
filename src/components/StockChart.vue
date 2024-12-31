@@ -38,10 +38,15 @@ const drawChart = () => {
     // Clear previous chart
     d3.select(chartRef.value).selectAll('*').remove()
 
-    // Get window width instead of container width
+    // Significantly increase margins and dimensions
     const margin = { top: 50, right: 100, bottom: 120, left: 100 }
-    const width = window.innerWidth - margin.left - margin.right - 80 // subtract extra padding
-    const height = 900 - margin.top - margin.bottom
+    const width = window.innerWidth - margin.left - margin.right - 80
+    const height = 900 - margin.top - margin.bottom  // Increased height
+
+    // Add dynamic color based on price trend
+    const priceColor = d3.scaleThreshold()
+        .domain([0])
+        .range(['#FF4B4B', '#48CAE4']) // Red for negative, Blue for positive
 
     // Create SVG with gradient background
     const svg = d3.select(chartRef.value)
@@ -59,14 +64,13 @@ const drawChart = () => {
         .attr('y1', '0%')
         .attr('x2', '0%')
         .attr('y2', '100%')
+        .attr('gradientUnits', 'userSpaceOnUse')
 
-    gradient.append('stop')
-        .attr('offset', '0%')
-        .attr('stop-color', 'rgba(72, 202, 228, 0.3)')
-
-    gradient.append('stop')
-        .attr('offset', '100%')
-        .attr('stop-color', 'rgba(72, 202, 228, 0)')
+    gradient.append('animate')
+        .attr('attributeName', 'y1')
+        .attr('values', '0%;100%;0%')
+        .attr('dur', '10s')
+        .attr('repeatCount', 'indefinite')
 
     // Scales
     const x = d3.scaleTime()
@@ -112,17 +116,23 @@ const drawChart = () => {
         .y1(d => y(d.price))
         .curve(d3.curveMonotoneX)
 
-    // Add volume bars
+    // Add volume bars with dynamic coloring
     svg.selectAll('.volume-bar')
         .data(stockData)
         .enter()
         .append('rect')
         .attr('class', 'volume-bar')
-        .attr('x', d => x(d.date) - 3)  // Increased width
+        .attr('x', d => x(d.date) - 3)
         .attr('y', d => yVolume(d.volume))
-        .attr('width', 6)  // Increased width
+        .attr('width', 6)
         .attr('height', d => height - yVolume(d.volume))
-        .attr('fill', 'rgba(100, 100, 100, 0.3)')
+        .attr('fill', (d, i) => i > 0 ? 
+            priceColor(stockData[i].price - stockData[i-1].price) : 
+            'rgba(100, 100, 100, 0.3)')
+        .style('opacity', 0)
+        .transition()
+        .duration(1000)
+        .style('opacity', 0.7)
 
     // Add the area
     svg.append('path')
@@ -237,6 +247,11 @@ const drawChart = () => {
             const d0 = stockData[i - 1]
             const d1 = stockData[i]
             const d = x0 - d0.date > d1.date - x0 ? d1 : d0
+            
+            const priceChange = i > 0 ? d.price - stockData[i-1].price : 0
+            const percentChange = i > 0 ? (priceChange / stockData[i-1].price) * 100 : 0
+            
+            const changeColor = priceChange >= 0 ? '#4CAF50' : '#FF4B4B'
 
             focus.attr('transform', `translate(${x(d.date)},${y(d.price)})`)
             focus.select('.x-hover-line')
@@ -249,16 +264,41 @@ const drawChart = () => {
                 .style('left', `${event.pageX + 10}px`)
                 .style('top', `${event.pageY - 10}px`)
                 .html(`
-          <strong>${d3.timeFormat('%B %d, %Y')(d.date)}</strong><br/>
-          Price: $${d.price.toFixed(2)}<br/>
-          Volume: ${d.volume.toLocaleString()}<br/>
-          MA20: $${d.ma20.toFixed(2)}
-        `)
+                    <strong>${d3.timeFormat('%B %d, %Y')(d.date)}</strong><br/>
+                    <div style="font-size: 1.2em; margin: 5px 0;">
+                        Price: $${d.price.toFixed(2)}
+                        <span style="color: ${changeColor}">
+                            ${priceChange >= 0 ? '▲' : '▼'}
+                            ${Math.abs(percentChange).toFixed(2)}%
+                        </span>
+                    </div>
+                    Volume: ${d.volume.toLocaleString()}<br/>
+                    MA20: $${d.ma20.toFixed(2)}<br/>
+                    BB Width: ${((d.bollUpper - d.bollLower) / d.price * 100).toFixed(2)}%
+                `)
         })
+
+    // Add crosshair effect
+    focus.append('line')
+        .attr('class', 'crosshair-vertical')
+        .attr('y1', 0)
+        .attr('y2', height)
+        .attr('stroke', '#666')
+        .attr('stroke-width', 0.5)
+        .attr('stroke-dasharray', '3,3')
 
     // Adjust tick styling
     svg.selectAll('.tick line')
         .attr('stroke', 'rgba(128, 128, 128, 0.1)')  // Lighter grid lines
+
+    // Animate price line on load
+    const totalLength = svg.select('.price-line').node().getTotalLength()
+    svg.select('.price-line')
+        .attr('stroke-dasharray', totalLength)
+        .attr('stroke-dashoffset', totalLength)
+        .transition()
+        .duration(2000)
+        .attr('stroke-dashoffset', 0)
 }
 
 // Handle window resize
@@ -266,7 +306,7 @@ const handleResize = () => {
     clearTimeout(resizeTimer)
     resizeTimer = setTimeout(() => {
         drawChart()
-    }, 100) // Reduced delay for smoother resizing
+    }, 250)
 }
 
 onMounted(() => {
@@ -361,6 +401,18 @@ h2 {
     pointer-events: none;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
     min-width: 250px;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+}
+
+.volume-bar:hover {
+    opacity: 1 !important;
+    transition: opacity 0.2s ease;
+}
+
+/* Add smooth transitions */
+.price-line, .ma20-line, .boll-upper, .boll-lower {
+    transition: d 0.3s ease;
 }
 
 :deep(.x-axis),

@@ -38,9 +38,10 @@ const drawChart = () => {
     // Clear previous chart
     d3.select(chartRef.value).selectAll('*').remove()
 
-    const margin = { top: 20, right: 50, bottom: 70, left: 50 }
+    // Increase margins and height
+    const margin = { top: 40, right: 80, bottom: 100, left: 80 }  // Increased margins
     const width = chartRef.value.clientWidth - margin.left - margin.right
-    const height = 500 - margin.top - margin.bottom
+    const height = 700 - margin.top - margin.bottom  // Increased from 500
 
     // Create SVG with gradient background
     const svg = d3.select(chartRef.value)
@@ -136,7 +137,7 @@ const drawChart = () => {
         .attr('class', 'price-line')
         .attr('fill', 'none')
         .attr('stroke', '#48CAE4')
-        .attr('stroke-width', 2)
+        .attr('stroke-width', 2.5)
         .attr('d', priceLine)
 
     svg.append('path')
@@ -144,7 +145,7 @@ const drawChart = () => {
         .attr('class', 'ma20-line')
         .attr('fill', 'none')
         .attr('stroke', '#FFB703')
-        .attr('stroke-width', 1.5)
+        .attr('stroke-width', 2)
         .attr('stroke-dasharray', '5,5')
         .attr('d', ma20Line)
 
@@ -153,7 +154,7 @@ const drawChart = () => {
         .attr('class', 'boll-upper')
         .attr('fill', 'none')
         .attr('stroke', '#FB8500')
-        .attr('stroke-width', 1)
+        .attr('stroke-width', 1.5)
         .attr('stroke-dasharray', '3,3')
         .attr('d', bollUpperLine)
 
@@ -162,7 +163,7 @@ const drawChart = () => {
         .attr('class', 'boll-lower')
         .attr('fill', 'none')
         .attr('stroke', '#FB8500')
-        .attr('stroke-width', 1)
+        .attr('stroke-width', 1.5)
         .attr('stroke-dasharray', '3,3')
         .attr('d', bollLowerLine)
 
@@ -184,14 +185,20 @@ const drawChart = () => {
         .attr('dx', '-.8em')
         .attr('dy', '.15em')
         .attr('transform', 'rotate(-45)')
+        .style('font-size', '12px')
 
     svg.append('g')
         .attr('class', 'y-axis')
         .attr('transform', `translate(${width}, 0)`)
         .call(yAxis)
+        .selectAll('text')
+        .style('font-size', '12px')
 
     // Add interactive overlay
     const tooltip = d3.select(tooltipRef.value)
+        .style('font-size', '14px')
+        .style('padding', '12px')
+
     const bisect = d3.bisector(d => d.date).left
 
     const overlay = svg.append('rect')
@@ -287,29 +294,36 @@ onUnmounted(() => {
 
 <style scoped>
 .stock-chart {
-    padding: 20px;
+    padding: 30px;
     background: var(--color-background-soft);
     border-radius: 8px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+    max-width: 1200px;
+    width: 95%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 h2 {
     color: var(--color-heading);
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
     text-align: center;
 }
 
 .chart-container {
     width: 100%;
     overflow: hidden;
+    min-height: 700px;
 }
 
 .legend {
     display: flex;
     justify-content: center;
-    gap: 20px;
-    margin-bottom: 20px;
+    gap: 30px;
+    margin-bottom: 30px;
+    font-size: 16px;
 }
 
 .legend span {
@@ -320,8 +334,8 @@ h2 {
 
 .legend-color {
     display: inline-block;
-    width: 20px;
-    height: 3px;
+    width: 30px;
+    height: 4px;
 }
 
 .legend-color.price {
@@ -339,18 +353,20 @@ h2 {
 .tooltip {
     position: absolute;
     display: none;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.95);
     border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 8px;
-    font-size: 12px;
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 14px;
     pointer-events: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
 }
 
 :deep(.x-axis),
 :deep(.y-axis) {
     color: var(--color-text);
+    font-size: 12px;
 }
 
 :deep(.x-axis path),
@@ -358,10 +374,43 @@ h2 {
 :deep(.x-axis line),
 :deep(.y-axis line) {
     stroke: var(--color-border);
+    stroke-width: 1.5;
 }
 
 :deep(.x-axis text),
 :deep(.y-axis text) {
     fill: var(--color-text);
+}
+
+:deep(.price-line) {
+    stroke-width: 2.5;
+}
+
+:deep(.ma20-line) {
+    stroke-width: 2;
+}
+
+:deep(.boll-upper), :deep(.boll-lower) {
+    stroke-width: 1.5;
+}
+
+@media (max-width: 768px) {
+    .stock-chart {
+        padding: 15px;
+        width: 98%;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    .chart-container {
+        min-height: 500px;
+    }
+
+    .legend {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
 }
 </style>

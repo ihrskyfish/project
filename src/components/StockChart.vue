@@ -38,10 +38,10 @@ const drawChart = () => {
     // Clear previous chart
     d3.select(chartRef.value).selectAll('*').remove()
 
-    // Significantly increase margins and dimensions
+    // Get window width instead of container width
     const margin = { top: 50, right: 100, bottom: 120, left: 100 }
-    const width = chartRef.value.clientWidth - margin.left - margin.right
-    const height = 900 - margin.top - margin.bottom  // Increased height
+    const width = window.innerWidth - margin.left - margin.right - 80 // subtract extra padding
+    const height = 900 - margin.top - margin.bottom
 
     // Create SVG with gradient background
     const svg = d3.select(chartRef.value)
@@ -266,7 +266,7 @@ const handleResize = () => {
     clearTimeout(resizeTimer)
     resizeTimer = setTimeout(() => {
         drawChart()
-    }, 250)
+    }, 100) // Reduced delay for smoother resizing
 }
 
 onMounted(() => {
@@ -299,9 +299,8 @@ onUnmounted(() => {
     border-radius: 12px;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
     margin: 40px auto;
-    /* Make container much wider */
-    max-width: 1600px;  /* Increased from 1200px */
-    width: 98%;
+    width: 100%;
+    max-width: none;
 }
 
 h2 {

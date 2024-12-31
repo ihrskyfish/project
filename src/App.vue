@@ -5,12 +5,9 @@ import StockChart from './components/StockChart.vue'
 </script>
 
 <template>
- 
-
-  <main>
-    <StockChart />
-    <!-- <TheWelcome /> -->
-  </main>
+  <div>
+    <StockChart  />
+  </div>
 </template>
 
 <style scoped>
